@@ -25,49 +25,56 @@ array = []
 array_size = 50
 delay = 0.1
 sorting = False
-current_algorithm = None
+current_algorithm = None  # Will be set to bubble_sort by default in setup
 
 # GUI Elements
 algo_dropdown = pygame_gui.elements.UIDropDownMenu(
-    options_list=["Bubble Sort", "Selection Sort", "Insertion Sort", "Quick Sort", "Merge Sort"],
+    options_list=[
+        "Bubble Sort",
+        "Selection Sort",
+        "Insertion Sort",
+        "Quick Sort",
+        "Merge Sort",
+    ],
     starting_option="Bubble Sort",
     relative_rect=pygame.Rect(10, 10, 150, 30),
-    manager=manager
+    manager=manager,
 )
 size_slider = pygame_gui.elements.UIHorizontalSlider(
     relative_rect=pygame.Rect(170, 10, 150, 30),
     start_value=50,
     value_range=(10, 100),
-    manager=manager
+    manager=manager,
 )
 speed_slider = pygame_gui.elements.UIHorizontalSlider(
     relative_rect=pygame.Rect(330, 10, 150, 30),
     start_value=0.1,
     value_range=(0.01, 1.0),
-    manager=manager
+    manager=manager,
 )
 start_button = pygame_gui.elements.UIButton(
-    relative_rect=pygame.Rect(490, 10, 100, 30),
-    text="Start",
-    manager=manager
+    relative_rect=pygame.Rect(490, 10, 100, 30), text="Start", manager=manager
 )
 reset_button = pygame_gui.elements.UIButton(
-    relative_rect=pygame.Rect(600, 10, 100, 30),
-    text="Reset",
-    manager=manager
+    relative_rect=pygame.Rect(600, 10, 100, 30), text="Reset", manager=manager
 )
+
 
 def generate_array(size):
     return [random.randint(10, 500) for _ in range(size)]
+
 
 def draw_array(array, highlight_indices=None):
     screen.fill(BLACK)
     bar_width = WINDOW_SIZE[0] // len(array)
     for i, value in enumerate(array):
         color = RED if highlight_indices and i in highlight_indices else WHITE
-        pygame.draw.rect(screen, color, (i * bar_width, WINDOW_SIZE[1] - value, bar_width - 2, value))
+        pygame.draw.rect(
+            screen, color, (i * bar_width, WINDOW_SIZE[1] - value, bar_width - 2, value)
+        )
     manager.draw_ui(screen)
     pygame.display.flip()
+
 
 async def bubble_sort(arr):
     for i in range(len(arr)):
@@ -77,6 +84,7 @@ async def bubble_sort(arr):
                 draw_array(arr, [j, j + 1])
                 await asyncio.sleep(delay)
     return arr
+
 
 async def selection_sort(arr):
     for i in range(len(arr)):
@@ -90,6 +98,7 @@ async def selection_sort(arr):
         draw_array(arr, [i, min_idx])
         await asyncio.sleep(delay)
     return arr
+
 
 async def insertion_sort(arr):
     for i in range(1, len(arr)):
@@ -105,12 +114,14 @@ async def insertion_sort(arr):
         await asyncio.sleep(delay)
     return arr
 
+
 async def quick_sort(arr, low, high):
     if low < high:
         pi = await partition(arr, low, high)
         await quick_sort(arr, low, pi - 1)
         await quick_sort(arr, pi + 1, high)
     return arr
+
 
 async def partition(arr, low, high):
     pivot = arr[high]
@@ -126,6 +137,7 @@ async def partition(arr, low, high):
     await asyncio.sleep(delay)
     return i + 1
 
+
 async def merge_sort(arr, l, r):
     if l < r:
         m = (l + r) // 2
@@ -134,9 +146,10 @@ async def merge_sort(arr, l, r):
         await merge(arr, l, m, r)
     return arr
 
+
 async def merge(arr, l, m, r):
-    left = arr[l:m + 1]
-    right = arr[m + 1:r + 1]
+    left = arr[l : m + 1]
+    right = arr[m + 1 : r + 1]
     i = j = 0
     k = l
     while i < len(left) and j < len(right):
@@ -162,10 +175,13 @@ async def merge(arr, l, m, r):
         draw_array(arr, [k])
         await asyncio.sleep(delay)
 
+
 def setup():
-    global array
+    global array, current_algorithm
     array = generate_array(array_size)
+    current_algorithm = bubble_sort  # Set default algorithm
     draw_array(array)
+
 
 async def main():
     global array, array_size, delay, sorting, current_algorithm
@@ -177,19 +193,22 @@ async def main():
                 return
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == start_button and not sorting:
+                    if current_algorithm is None:
+                        print("No algorithm selected. Defaulting to Bubble Sort.")
+                        current_algorithm = bubble_sort
                     sorting = True
                     algo = algo_dropdown.selected_option
-                    if algo == "Bubble Sort":
-                        current_algorithm = bubble_sort
-                    elif algo == "Selection Sort":
-                        current_algorithm = selection_sort
-                    elif algo == "Insertion Sort":
-                        current_algorithm = insertion_sort
-                    elif algo == "Quick Sort":
-                        current_algorithm = lambda arr: quick_sort(arr, 0, len(arr) - 1)
-                    elif algo == "Merge Sort":
-                        current_algorithm = lambda arr: merge_sort(arr, 0, len(arr) - 1)
-                    await current_algorithm(array.copy())
+                    algo_map = {
+                        "Bubble Sort": bubble_sort,
+                        "Selection Sort": selection_sort,
+                        "Insertion Sort": insertion_sort,
+                        "Quick Sort": lambda arr: quick_sort(arr, 0, len(arr) - 1),
+                        "Merge Sort": lambda arr: merge_sort(arr, 0, len(arr) - 1),
+                    }
+                    current_algorithm = algo_map.get(
+                        algo, bubble_sort
+                    )  # Default to bubble_sort if algo not found
+                    array = await current_algorithm(array.copy())
                     sorting = False
                     draw_array(array)
                 elif event.ui_element == reset_button:
@@ -202,10 +221,23 @@ async def main():
                     draw_array(array)
                 elif event.ui_element == speed_slider:
                     delay = event.value
+            if event.type == pygame_gui.UI_DROP_DOWN_MENU_CHANGED:
+                algo = algo_dropdown.selected_option
+                algo_map = {
+                    "Bubble Sort": bubble_sort,
+                    "Selection Sort": selection_sort,
+                    "Insertion Sort": insertion_sort,
+                    "Quick Sort": lambda arr: quick_sort(arr, 0, len(arr) - 1),
+                    "Merge Sort": lambda arr: merge_sort(arr, 0, len(arr) - 1),
+                }
+                current_algorithm = algo_map.get(
+                    algo, bubble_sort
+                )  # Update on dropdown change
             manager.process_events(event)
         manager.update(clock.tick(FPS) / 1000.0)
         draw_array(array)
         await asyncio.sleep(1.0 / FPS)
+
 
 if platform.system() == "Emscripten":
     asyncio.ensure_future(main())
