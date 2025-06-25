@@ -1,0 +1,51 @@
+{
+  "defaults": {
+    "colours": {
+      "normal_bg": "#2C2F33",
+      "hovered_bg": "#3A3D42",
+      "normal_text": "#FFFFFF",
+      "hovered_text": "#FFFFFF",
+      "normal_border": "#4A4D53",
+      "hovered_border": "#5A5D63"
+    },
+    "font": {
+      "name": "Arial",
+      "size": 14
+    }
+  },
+  "button": {
+    "colours": {
+      "normal_bg": "#7289DA",
+      "hovered_bg": "#677BC4",
+      "normal_text": "#FFFFFF",
+      "hovered_text": "#FFFFFF"
+    }
+  },
+  "drop_down_menu": {
+    "colours": {
+      "normal_bg": "#2C2F33",
+      "hovered_bg": "#3A3D42"
+    }
+  },
+  "horizontal_slider": {
+    "colours": {
+      "normal_bg": "#4A4D53",
+      "hovered_bg": "#5A5D63",
+      "normal_thumb": "#7289DA",
+      "hovered_thumb": "#677BC4"
+    }
+  },
+  "label": {
+    "colours": {
+      "normal_text": "#FFFFFF",
+      "normal_bg": "#00000000"
+    }
+  },
+  "text_box": {
+    "colours": {
+      "normal_bg": "#2C2F33",
+      "normal_text": "#FFFFFF",
+      "normal_border": "#4A4D53"
+    }
+  }
+}
